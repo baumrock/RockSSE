@@ -13,7 +13,3 @@ rocksse()->addStream(
     sleep(1);
   },
 );
-
-return [
-  'description' => 'This example shows how you can add a progress indicator to your stream.',
-];

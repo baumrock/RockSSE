@@ -9,7 +9,3 @@ rocksse()->addStream(
     sleep(1);
   },
 );
-
-return [
-  'description' => 'This example shows a simple clock that uses the SSE stream to show the current server time every second.',
-];
