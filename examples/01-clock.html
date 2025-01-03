@@ -1,5 +1,5 @@
 <button
-  id="start-clock-01"
+  id="start-clock"
   class="ui-button"
   type="button"
 >
@@ -7,7 +7,7 @@
   Start
 </button>
 <button
-  id="stop-clock-01"
+  id="stop-clock"
   class="ui-button ui-priority-secondary uk-margin-right"
   type="button"
 >
@@ -17,7 +17,7 @@
 <span class="uk-text-nowrap">
   Clock:
   <span
-    id="clock-01"
+    id="clock"
     class="uk-margin-small-left"
     >--- not yet started ---</span
   >
@@ -25,9 +25,9 @@
 <script>
   (() => {
     let isRunning = false;
-    let start = document.querySelector("#start-clock-01");
-    let stop = document.querySelector("#stop-clock-01");
-    let clock = document.querySelector("#clock-01");
+    let start = document.querySelector("#start-clock");
+    let stop = document.querySelector("#stop-clock");
+    let clock = document.querySelector("#clock");
     let conn = false;
 
     // handle clicks on start button
@@ -56,6 +56,9 @@
 
       // close connection
       conn.close();
+
+      // update text
+      clock.innerText = "--- stopped ---";
     });
   })();
 </script>

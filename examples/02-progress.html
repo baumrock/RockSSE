@@ -1,0 +1,82 @@
+<div class="uk-flex uk-flex-middle">
+  <div class="uk-text-nowrap">
+    <button
+      id="start-progress"
+      class="ui-button"
+      type="button"
+    >
+      <i class="fa fa-play uk-margin-small-right"></i>
+      Start
+    </button>
+    <button
+      id="stop-progress"
+      class="ui-button ui-priority-secondary uk-margin-right"
+      type="button"
+    >
+      <i class="fa fa-stop uk-margin-small-right"></i>
+      Stop
+    </button>
+  </div>
+  <div
+    class="uk-flex uk-flex-middle uk-width-1-1"
+    style="gap: 20px"
+  >
+    <span> <span id="current">0</span>/100 </span>
+    <progress
+      id="progress"
+      class="uk-progress"
+      value=""
+      max=""
+    ></progress>
+  </div>
+</div>
+<script>
+  (() => {
+    let isRunning = false;
+    let start = document.querySelector("#start-progress");
+    let stop = document.querySelector("#stop-progress");
+    let current = document.querySelector("#current");
+    let progress = document.querySelector("#progress");
+    let conn = false;
+
+    // handle clicks on start button
+    start.addEventListener("click", (e) => {
+      // prevent starting stream more than once
+      if (isRunning) return;
+      isRunning = true;
+
+      // start stream and update the conn variable
+      conn = RockSSE.start({
+        url: "/examples/progress",
+        onmessage: (msg) => {
+          const cnt = parseInt(msg);
+
+          // when we reach 100 on the backend the connection is closed
+          // this line will close the connection also from the frontend
+          // so that the browser will not restart the strem
+          if (cnt > 99) conn.close();
+
+          current.innerText = cnt;
+          progress.value = (cnt / 100).toString();
+        },
+        onerror: (event) => {
+          isRunning = false;
+        },
+      });
+    });
+
+    // handle clicks on stop button
+    stop.addEventListener("click", (e) => {
+      // prevent stopping stream more than once
+      if (!isRunning) return;
+      isRunning = false;
+
+      // close connection
+      conn.close();
+
+      // update text
+      current.innerText = 0;
+      progress.value = 0;
+    });
+  })();
+</script>

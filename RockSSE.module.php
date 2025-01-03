@@ -32,7 +32,13 @@ class RockSSE extends WireData implements Module, ConfigurableModule
       header("Cache-Control: no-cache");
       header("Content-Type: text/event-stream");
       ini_set('max_execution_time', $maxExecutionTime);
-      while (true) $loop($this);
+      while (true) {
+        // execute the callback and get result
+        $result = $loop($this);
+
+        // if the callback returned FALSE we break out of the endless loop
+        if ($result === false) break;
+      }
     });
   }
 
