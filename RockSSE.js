@@ -18,9 +18,11 @@ var RockSSE;
     url = false;
 
     // callbacks for the stream
+    errorAlert = false;
     onmessage = false;
     onerror = false;
     ondone = false;
+    started = false;
     stopped = false;
 
     constructor(url) {
@@ -32,8 +34,20 @@ var RockSSE;
       conn.onmessage = (event) => {
         if (this.onmessage) this.onmessage(event);
       };
+
+      // error handler
       conn.onerror = (event) => {
+        // send error to onerror() callback if it is set
         if (this.onerror) this.onerror(event);
+
+        // by default we log the error to the console and show an alert
+        // you can provide a custom callback via config.errorAlert
+        if (this.errorAlert) {
+          this.errorAlert(event);
+        } else {
+          console.error(event);
+          alert("Error - check console");
+        }
       };
     }
 
@@ -48,6 +62,7 @@ var RockSSE;
       this.isRunning = true;
       this.conn = new EventSource("/rocksse" + this.url);
       this.addCallbacks();
+      if (this.started) this.started();
     }
 
     stop() {

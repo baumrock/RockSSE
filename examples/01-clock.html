@@ -18,14 +18,10 @@
     const clock = li.querySelector(".clock");
 
     // handle clicks on start button
-    start.addEventListener("click", () => {
-      stream.start();
-    });
+    start.addEventListener("click", stream.start.bind(stream));
 
     // handle clicks on stop button
-    stop.addEventListener("click", () => {
-      stream.stop();
-    });
+    stop.addEventListener("click", stream.stop.bind(stream));
 
     // setup stream
     stream.debug = true;
