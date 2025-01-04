@@ -28,10 +28,11 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     callable $loop,
   ): void {
     wire()->addHookAfter($url, function () use ($loop) {
-      $maxExecutionTime = 10;
+      set_time_limit(0);
       header("Cache-Control: no-cache");
       header("Content-Type: text/event-stream");
-      ini_set('max_execution_time', $maxExecutionTime);
+
+      // start endless loop for the stream
       while (true) {
         // execute the callback and get result
         $result = $loop($this);
