@@ -53,6 +53,11 @@
 
     // setup stream
     stream.debug = true;
+
+    stream.started = () => {
+      setProgress(0, 0);
+    };
+
     stream.onmessage = (event) => {
       // try to parse JSON from the message
       const json = stream.getJSON(event.data);
@@ -66,7 +71,9 @@
 
     stream.stopped = () => {
       stream.message("Connection closed");
-      setProgress(0, 0);
+      // reset progressbar if job was not complete
+      // stay at 100% when job was successfully completed
+      if (progress.value < 1) setProgress(0, 0);
     };
   })();
 </script>

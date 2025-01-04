@@ -32,6 +32,12 @@ var RockSSE;
     addCallbacks() {
       const conn = this.conn;
       conn.onmessage = (event) => {
+        // close connection when we get the done signal
+        if (event.data === ProcessWire.config["rocksse-done"]) {
+          this.stop();
+          if (this.ondone) this.ondone();
+          return;
+        }
         if (this.onmessage) this.onmessage(event);
       };
 
