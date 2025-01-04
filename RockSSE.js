@@ -61,6 +61,14 @@ var RockSSE;
       this.onmessage({ data: msg });
     }
 
+    getJSON(msg) {
+      try {
+        return JSON.parse(msg);
+      } catch (error) {
+        return false;
+      }
+    }
+
     start() {
       if (this.isRunning) return;
       this.log("starting stream ...", this.url);
@@ -74,93 +82,13 @@ var RockSSE;
       if (!this.isRunning) return;
       this.log("stopping stream ...");
       this.isRunning = false;
-      this.conn.close();
+      if (this.conn) {
+        this.conn.close();
+        this.conn = null;
+      }
       if (this.stopped) this.stopped();
     }
   }
 
   RockSSE = new _RockSSE();
 })();
-
-// var RockSSE = {
-//   streams: [],
-
-//   /**
-//    * Parse JSON from received message
-//    */
-//   getJSON(msg) {
-//     try {
-//       const json = JSON.parse(msg);
-//       return json;
-//     } catch (error) {
-//       return false;
-//     }
-//   },
-
-//   addStream(name) {
-//     this.streams.push(new Stream());
-//     console.log(this.streams);
-//   },
-
-//   /**
-//    * Start a new SSE stream
-//    */
-//   start(config) {
-//     const conn = new EventSource("/rocksse" + config.url);
-
-//     const debounce = 100;
-//     let messages = [];
-
-//     // send messages
-//     const sendMessages = function () {
-//       messages.forEach((event) => {
-//         // close connection when we get the done signal
-//         if (event.data === ProcessWire.config["rocksse-done"]) {
-//           // close connection
-//           conn.close();
-
-//           // trigger ondone callback if it is set
-//           if (typeof config.ondone === "function") {
-//             config.ondone();
-//           }
-//         }
-
-//         // send message to onmessage() callback if it is set
-//         if (typeof config.onmessage === "function") {
-//           config.onmessage(event.data, event);
-//         }
-//       });
-//       messages = [];
-//     };
-//     setInterval(sendMessages, debounce);
-
-//     // handle messages
-//     conn.onmessage = (event) => {
-//       messages.push(event);
-//     };
-
-//     // handle errors
-//     conn.onerror = (event) => {
-//       // send error to onerror() callback if it is set
-//       if (typeof config.onerror === "function") config.onerror(event);
-
-//       // by default we log the error to the console and show an alert
-//       // you can provide a custom callback via config.errorAlert
-//       if (typeof config.errorAlert === "function") {
-//         config.errorAlert(event);
-//       } else {
-//         console.error(event);
-//         alert("Error - check console");
-//       }
-//     };
-
-//     // return conn so the frontend can close the connection if neccessary
-//     return conn;
-//   },
-// };
-
-// class Stream {
-//   start() {
-//     return "start!";
-//   }
-// }

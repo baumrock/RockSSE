@@ -26,9 +26,9 @@
 </div>
 <script>
   (() => {
-    return;
-    let conn = false;
-    let isRunning = false;
+    const stream = RockSSE.addStream("/examples/delete-users");
+
+    // dom elements
     const li = document.currentScript.closest("li.Inputfield");
     const start = li.querySelector(".start");
     const stop = li.querySelector(".stop");
@@ -37,17 +37,8 @@
     const total = li.querySelector(".total");
     const progress = li.querySelector("progress");
 
-    // function to log a message to the textarea
-    const logMsg = function (msg) {
-      log.value = msg + "\n" + log.value;
-    };
-
-    // function to update progress
-    const updateProgress = function (data) {
-      if (!data) return;
-      setProgress(data.num, data.total);
-    };
-    const setProgress = function (newNum, newTotal) {
+    // helper functions
+    const setProgress = (newNum, newTotal) => {
       num.innerText = newNum;
       total.innerText = newTotal;
       if (!newTotal) progress.value = 0;
@@ -55,40 +46,29 @@
     };
 
     // handle clicks on start button
-    start.addEventListener("click", (e) => {
-      // prevent starting stream more than once
-      if (isRunning) return;
-      isRunning = true;
-
-      setProgress(0, 0);
-
-      // start stream and update the conn variable
-      conn = RockSSE.start({
-        url: "/examples/delete-users",
-        onmessage: (msg) => {
-          // if data is a json object we received the iterator
-          // and we can update the progressbar
-          updateProgress(RockSSE.getJSON(msg));
-
-          // always log message to textarea
-          logMsg(msg);
-        },
-        onerror: (event) => {
-          isRunning = false;
-        },
-        ondone: () => {
-          isRunning = false;
-        },
-      });
-    });
+    start.addEventListener("click", stream.start.bind(stream));
 
     // handle clicks on stop button
-    stop.addEventListener("click", (e) => {
+    stop.addEventListener("click", stream.stop.bind(stream));
+
+    // setup stream
+    stream.debug = true;
+    stream.onmessage = (event) => {
+      // try to parse JSON from the message
+      const json = stream.getJSON(event.data);
+      if (json) {
+        // if we got JSON data update the progress
+        if (json.num !== undefined && json.total !== undefined) {
+          setProgress(json.num, json.total);
+        }
+      }
+      // always log the message
+      log.value = event.data + "\n" + log.value;
+    };
+
+    stream.stopped = () => {
+      stream.message("Connection closed");
       setProgress(0, 0);
-      if (!isRunning) return;
-      isRunning = false;
-      conn.close();
-      logMsg("Connection closed");
-    });
+    };
   })();
 </script>
