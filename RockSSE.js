@@ -14,6 +14,8 @@ var RockSSE;
   class Stream {
     conn = false;
     debug = false;
+    interval = 750; // default interval in ms
+    intervalAdded = false;
     isRunning = false;
     url = false;
 
@@ -22,6 +24,7 @@ var RockSSE;
     onmessage = false;
     onerror = false;
     ondone = false;
+    oninterval = false;
     onstart = false;
     onstop = false;
     onstarted = false;
@@ -59,6 +62,15 @@ var RockSSE;
       };
     }
 
+    addInterval() {
+      if (this.intervalAdded) return;
+      this.intervalAdded = true;
+      setInterval(() => {
+        if (!this.isRunning) return;
+        if (this.oninterval) this.oninterval(this.data);
+      }, this.interval);
+    }
+
     log(data) {
       if (!this.debug) return;
       console.log(data);
@@ -78,6 +90,9 @@ var RockSSE;
     }
 
     start() {
+      // prepare fresh data for interval callback
+      this.data = {};
+
       // always fire the onstart event (even if the stream is running)
       // this is in case one wants to provide user feedback like an alert
       // that indicates that the stream is running and can not be started again
@@ -88,12 +103,16 @@ var RockSSE;
       this.isRunning = true;
       this.conn = new EventSource("/rocksse" + this.url);
       this.addCallbacks();
+      this.addInterval();
       if (this.onstarted) this.onstarted();
     }
 
     stop() {
       // always fire the onstop callback - see notes in start()
       if (this.onstop) this.onstop();
+
+      // trigger the final interval callback
+      if (this.oninterval) this.oninterval(this.data);
 
       if (!this.isRunning) return;
       this.log("stopping stream ...");

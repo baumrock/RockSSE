@@ -7,7 +7,7 @@ use RockSSE\Stream;
 rocksse()->addStream(
   url: '/examples/delete-users',
   init: function (Stream $stream) {
-    $stream->sleep = 10;
+    // $stream->sleep = 10;
     $iterator = $stream->iterator;
     $userIDs = wire()->users->findIDs('name^=rocksse-example,sort=-id');
     $total = count($userIDs);

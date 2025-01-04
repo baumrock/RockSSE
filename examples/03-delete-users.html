@@ -51,8 +51,8 @@
     // handle clicks on stop button
     stop.addEventListener("click", stream.stop.bind(stream));
 
-    // setup stream
-    stream.debug = true;
+    // ----- setup stream -----
+    stream.debug = false;
 
     stream.onstarted = () => {
       setProgress(0, 0);
@@ -63,10 +63,22 @@
       const json = stream.getJSON(event.data);
       if (json) {
         // if we got JSON data update the progress
-        setProgress(json.num || 0, json.total || 0);
+        stream.data.num = json.num || 0;
+        stream.data.total = json.total || 0;
       }
+
       // always log the message to the textarea
       log.value = event.data + "\n" + log.value;
+    };
+
+    /**
+     * Use oninterval to update the progressbar
+     * This is because when updating on every message the css transitions
+     * can not keep pace and the progress indication fails!
+     */
+    stream.oninterval = (data) => {
+      stream.log(data);
+      setProgress(data.num || 0, data.total || 0);
     };
 
     stream.onstopped = () => {
