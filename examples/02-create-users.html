@@ -14,48 +14,30 @@
   single-directional nature of SSE.
 </p>
 <script>
-  console.log("02");
   (() => {
-    return;
-    let conn = false;
-    let isRunning = false;
+    const stream = RockSSE.addStream("/examples/create-users");
+
+    // dom elements
     const li = document.currentScript.closest("li.Inputfield");
     const start = li.querySelector(".start");
     const stop = li.querySelector(".stop");
     const log = li.querySelector(".log");
 
-    // function to log a message to the textarea
-    const logMsg = function (msg) {
-      log.value = msg + "\n" + log.value;
-    };
-
     // handle clicks on start button
-    start.addEventListener("click", (e) => {
-      // prevent starting stream more than once
-      if (isRunning) return;
-      isRunning = true;
-
-      // start stream and update the conn variable
-      conn = RockSSE.start({
-        url: "/examples/create-users",
-        onmessage: (msg) => {
-          logMsg(msg);
-        },
-        onerror: (event) => {
-          isRunning = false;
-        },
-      });
-    });
+    start.addEventListener("click", stream.start.bind(stream));
 
     // handle clicks on stop button
-    stop.addEventListener("click", (e) => {
-      // prevent stopping stream more than once
-      if (!isRunning) return;
-      isRunning = false;
-      conn.close();
-      logMsg(
+    stop.addEventListener("click", stream.stop.bind(stream));
+
+    // setup stream
+    stream.debug = true;
+    stream.onmessage = (event) => {
+      log.value = event.data + "\n" + log.value;
+    };
+    stream.stopped = () => {
+      stream.message(
         "Connection closed - some more users might have been created in the background during shutdown."
       );
-    });
+    };
   })();
 </script>

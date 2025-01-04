@@ -56,6 +56,11 @@ var RockSSE;
       console.log(data);
     }
 
+    message(msg) {
+      if (!this.onmessage) return;
+      this.onmessage({ data: msg });
+    }
+
     start() {
       if (this.isRunning) return;
       this.log("starting stream ...", this.url);
