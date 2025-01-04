@@ -34,7 +34,7 @@
 
       // start stream and update the conn variable
       conn = RockSSE.start({
-        url: "/examples/delete-users",
+        url: "/rocksse/examples/delete-users",
         onmessage: (msg) => {
           logMsg(msg);
         },

@@ -3,6 +3,7 @@
 namespace ProcessWire;
 
 use RockSSE\Iterator;
+use RockSSE\Stream;
 
 function rocksse(): RockSSE
 {
@@ -18,11 +19,13 @@ class RockSSE extends WireData implements Module, ConfigurableModule
 {
   private $exampleData = false;
   public $loadExamples = false;
+  private $streams = [];
 
   public function init()
   {
     $this->loadExampleData();
     $this->devTools();
+    wire()->addHook('/rocksse/(.*)', $this, 'serveStream');
   }
 
   public function addStream(
@@ -30,31 +33,15 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     callable $loop,
     callable $init = null,
   ): void {
-    wire()->addHookAfter($url, function () use ($loop, $init) {
-      set_time_limit(0);
-      header("Cache-Control: no-cache");
-      header("Content-Type: text/event-stream");
+    if (array_key_exists($url, $this->streams)) {
+      throw new WireException("Stream already exists: $url");
+    }
 
-      // initialize the iterator
-      $iterator = $this->newIterator();
-
-      // if we have an init callback we call it now
-      if (is_callable($init)) $init($iterator);
-
-      // start endless loop for the stream
-      while (true) {
-        // stop loop when connection is aborted
-        if (connection_aborted()) break;
-
-        // execute the callback and get result
-        $result = $loop($this, $iterator);
-
-        // if the callback returned FALSE we break out of the endless loop
-        if ($result === false) break;
-
-        $iterator->next();
-      }
-    });
+    require_once __DIR__ . '/Stream.php';
+    $stream = new Stream($url);
+    $stream->loop = $loop;
+    if (is_callable($init)) $stream->init = $init;
+    $this->streams[$url] = $stream;
   }
 
   public function addExamples(InputfieldWrapper $inputfields): void
@@ -88,6 +75,13 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     }
   }
 
+  public function __debugInfo()
+  {
+    return [
+      'streams' => $this->streams,
+    ];
+  }
+
   private function devTools(): void
   {
     if (!wire()->config->debug) return;
@@ -107,6 +101,35 @@ class RockSSE extends WireData implements Module, ConfigurableModule
   {
     $this->addExamples($inputfields);
     return $inputfields;
+  }
+
+  public function getStream($url): Stream|false
+  {
+    return $this->streams[$url] ?? false;
+  }
+
+  private function loadExampleData()
+  {
+    if (!$this->loadExamples) return;
+    if ($this->exampleData) return $this->exampleData;
+    $arr = [];
+    $examples = glob(__DIR__ . '/examples/*.php');
+    $buttons = wire()->files->render(__DIR__ . '/examples/_buttons.html');
+    foreach ($examples as $file) {
+      $data = wire()->files->render($file);
+      if (!is_array($data)) $data = [];
+      if (!array_key_exists('value', $data)) {
+        // load markup from .html file
+        $html = substr($file, 0, -4) . '.html';
+        if (is_file($html)) {
+          $markup = wire()->files->render($html);
+          $markup = str_replace('{buttons}', $buttons, $markup);
+          $data['value'] = $markup;
+        }
+      }
+      $arr[$file] = $data;
+    }
+    $this->exampleData = $arr;
   }
 
   public function newIterator(): Iterator
@@ -143,38 +166,11 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     }
   }
 
-  private function loadExampleData()
+  public function serveStream(HookEvent $event)
   {
-    if (!$this->loadExamples) return;
-    if ($this->exampleData) return $this->exampleData;
-    $arr = [];
-    $examples = glob(__DIR__ . '/examples/*.php');
-    $buttons = wire()->files->render(__DIR__ . '/examples/_buttons.html');
-    foreach ($examples as $file) {
-      $data = wire()->files->render($file);
-      if (!is_array($data)) $data = [];
-      if (!array_key_exists('value', $data)) {
-        // load markup from .html file
-        $html = substr($file, 0, -4) . '.html';
-        if (is_file($html)) {
-          $markup = wire()->files->render($html);
-          $markup = str_replace('{buttons}', $buttons, $markup);
-          $data['value'] = $markup;
-        }
-      }
-      $arr[$file] = $data;
-    }
-    $this->exampleData = $arr;
-  }
-
-  /**
-   * Send SSE message to client
-   */
-  public function send(mixed $msg): void
-  {
-    if (!is_string($msg)) $msg = json_encode($msg);
-    echo "data: $msg\n\n";
-    echo str_pad('', 8186) . "\n";
-    flush();
+    $url = '/' . $event->arguments(1);
+    $stream = $this->getStream($url);
+    if (!$stream) throw new Wire404Exception("Stream not found: $url");
+    $stream->serve();
   }
 }

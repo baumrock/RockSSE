@@ -6,27 +6,44 @@ use ProcessWire\WireData;
 
 class Iterator extends WireData
 {
-  private int $index;
-  private int $num;
+  public $context;
+  public int $index = 0;
+  public int $num = 1;
+  public float $progress = 0;
+  public int $total = 0;
 
-  public function __construct()
+  public function __debugInfo()
   {
-    $this->index = 0;
-    $this->num = 1;
-  }
-
-  public function __get($name)
-  {
-    return match ($name) {
+    return [
+      'context' => $this->context,
       'index' => $this->index,
       'num' => $this->num,
-      default => parent::__get($name),
-    };
+      'progress' => $this->progress,
+      'total' => $this->total,
+    ];
+  }
+
+  public function isDone(): bool
+  {
+    return $this->progress >= 1;
   }
 
   public function next(): void
   {
     $this->index++;
     $this->num++;
+    $this->updateProgress();
+  }
+
+  public function setTotal(int $total): self
+  {
+    $this->total = $total;
+    $this->updateProgress();
+    return $this;
+  }
+
+  private function updateProgress(): void
+  {
+    $this->progress = round($this->num / $this->total, 4);
   }
 }

@@ -2,20 +2,19 @@
 
 namespace ProcessWire;
 
-use RockSSE\Iterator;
+use RockSSE\Stream;
 
 rocksse()->addStream(
   url: '/examples/delete-users',
-  init: function ($iterator) {
-    $userIDs = wire()->users->findIDs('name^=rocksse-example,sort=-id');
-    $iterator->userIDs = $userIDs;
+  init: function (Stream $stream) {
+    $userIDs = wire()->users->findIDs('name^=rocksse-example,sort=-id,limit=3');
+    $iterator = $stream->iterator;
+    $iterator->setTotal(count($userIDs));
+    $stream->iterator->userIDs = $userIDs;
   },
-  loop: function (RockSSE $sse, Iterator $iterator) {
-    // get user to delete
-    // $u = wire()->users->get($userID);
-    $count = count($iterator->userIDs);
-    $sse->send($iterator->num . ': ' . $count);
-
-    sleep(1);
+  loop: function (Stream $stream) {
+    $iterator = $stream->iterator;
+    $iterator->context = 'foo bar';
+    $stream->send($iterator);
   },
 );

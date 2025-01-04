@@ -8,6 +8,9 @@ var RockSSE = {
     // send message to onmessage() callback if it is set
     if (typeof config.onmessage === "function") {
       conn.onmessage = (event) => {
+        if (event.data === "ROCKSSE:STREAM-DONE") {
+          conn.close();
+        }
         config.onmessage(event.data, event);
       };
     }
