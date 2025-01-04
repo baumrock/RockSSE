@@ -81,6 +81,13 @@
       setProgress(data.num || 0, data.total || 0);
     };
 
+    stream.onstop = () => {
+      // stop button was pressed while stream is already done
+      // we reset stream data which will later cause the progressbar
+      // to redraw in oninterval
+      if (!stream.isRunning) stream.data = {};
+    };
+
     stream.onstopped = () => {
       stream.message("Connection closed");
       // reset progressbar if job was not complete
