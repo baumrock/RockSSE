@@ -28,7 +28,7 @@
     stream.onmessage = (event) => {
       clock.innerText = event.data;
     };
-    stream.stopped = () => {
+    stream.onstopped = () => {
       clock.innerText = "--- stopped ---";
     };
   })();

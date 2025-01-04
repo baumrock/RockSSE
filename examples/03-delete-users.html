@@ -54,7 +54,7 @@
     // setup stream
     stream.debug = true;
 
-    stream.started = () => {
+    stream.onstarted = () => {
       setProgress(0, 0);
     };
 
@@ -69,7 +69,7 @@
       log.value = event.data + "\n" + log.value;
     };
 
-    stream.stopped = () => {
+    stream.onstopped = () => {
       stream.message("Connection closed");
       // reset progressbar if job was not complete
       // stay at 100% when job was successfully completed

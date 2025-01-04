@@ -22,8 +22,10 @@ var RockSSE;
     onmessage = false;
     onerror = false;
     ondone = false;
-    started = false;
-    stopped = false;
+    onstart = false;
+    onstop = false;
+    onstarted = false;
+    onstopped = false;
 
     constructor(url) {
       this.url = url;
@@ -76,15 +78,23 @@ var RockSSE;
     }
 
     start() {
+      // always fire the onstart event (even if the stream is running)
+      // this is in case one wants to provide user feedback like an alert
+      // that indicates that the stream is running and can not be started again
+      if (this.onstart) this.onstart();
+
       if (this.isRunning) return;
       this.log("starting stream ...", this.url);
       this.isRunning = true;
       this.conn = new EventSource("/rocksse" + this.url);
       this.addCallbacks();
-      if (this.started) this.started();
+      if (this.onstarted) this.onstarted();
     }
 
     stop() {
+      // always fire the onstop callback - see notes in start()
+      if (this.onstop) this.onstop();
+
       if (!this.isRunning) return;
       this.log("stopping stream ...");
       this.isRunning = false;
@@ -92,7 +102,7 @@ var RockSSE;
         this.conn.close();
         this.conn = null;
       }
-      if (this.stopped) this.stopped();
+      if (this.onstopped) this.onstopped();
     }
   }
 

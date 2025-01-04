@@ -34,7 +34,7 @@
     stream.onmessage = (event) => {
       log.value = event.data + "\n" + log.value;
     };
-    stream.stopped = () => {
+    stream.onstopped = () => {
       stream.message(
         "Connection closed - some more users might have been created in the background during shutdown."
       );
