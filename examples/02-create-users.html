@@ -16,6 +16,10 @@
     const log = li.querySelector(".log");
     let conn = false;
 
+    const logMsg = function (msg) {
+      log.value = msg + "\n" + log.value;
+    };
+
     // handle clicks on start button
     start.addEventListener("click", (e) => {
       // prevent starting stream more than once
@@ -26,8 +30,7 @@
       conn = RockSSE.start({
         url: "/examples/create-users",
         onmessage: (msg) => {
-          // prepend msg to log textarea
-          log.value = msg + "\n" + log.value;
+          logMsg(msg);
         },
         onerror: (event) => {
           isRunning = false;
@@ -41,6 +44,9 @@
       if (!isRunning) return;
       isRunning = false;
       conn.close();
+      logMsg(
+        "Connection closed - some more users might have been created in the background during shutdown."
+      );
     });
   })();
 </script>

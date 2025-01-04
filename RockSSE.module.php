@@ -34,6 +34,9 @@ class RockSSE extends WireData implements Module, ConfigurableModule
 
       // start endless loop for the stream
       while (true) {
+        // stop loop when connection is aborted
+        if (connection_aborted()) break;
+
         // execute the callback and get result
         $result = $loop($this);
 
