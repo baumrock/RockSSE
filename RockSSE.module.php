@@ -151,6 +151,7 @@ class RockSSE extends WireData implements Module, ConfigurableModule
 
     // add RockSSE.js file
     $url = wire()->config->urls->root;
+    wire()->config->js('rocksse-done', Stream::done);
     wire()->config->scripts->add($url . 'site/modules/RockSSE/dst/RockSSE.min.js');
 
     // show warning when example hooks are attached to not forget disabling them

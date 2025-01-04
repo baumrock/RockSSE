@@ -1,6 +1,6 @@
 <p class="description">
-  This example will create a new guest user with name "rocksse-demo-#" every
-  second as long as the stream is running. It will log output to a textarea.
+  This example will create a new guest user with name "rocksse-demo-#" on every
+  iteration as long as the stream is running. It will log output to a textarea.
 </p>
 {buttons}
 <textarea
@@ -15,13 +15,14 @@
 </p>
 <script>
   (() => {
+    let conn = false;
     let isRunning = false;
     const li = document.currentScript.closest("li.Inputfield");
     const start = li.querySelector(".start");
     const stop = li.querySelector(".stop");
     const log = li.querySelector(".log");
-    let conn = false;
 
+    // function to log a message to the textarea
     const logMsg = function (msg) {
       log.value = msg + "\n" + log.value;
     };

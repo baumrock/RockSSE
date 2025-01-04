@@ -79,7 +79,8 @@ class Stream extends WireData
       $result = ($this->loop)($this);
 
       // if the callback returned FALSE we break out of the endless loop
-      if ($result === false) break;
+      // and die() via done() method
+      if ($result === false) $this->done();
 
       // die() when done
       if ($iterator->isDone()) $this->done();

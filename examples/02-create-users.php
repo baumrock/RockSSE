@@ -2,13 +2,15 @@
 
 namespace ProcessWire;
 
+use RockSSE\Stream;
+
 rocksse()->addStream(
   url: '/examples/create-users',
-  loop: function (RockSSE $sse) {
+  loop: function (Stream $stream) {
+    $iterator = $stream->iterator;
     $u = new User();
-    $u->name = 'rocksse-example';
+    $u->name = 'rocksse-example-' . uniqid();
     $u->save();
-    $sse->send("Created User #$u {$u->name}");
-    sleep(1);
+    $stream->send($iterator->num . ": Created User #$u {$u->name}");
   },
 );

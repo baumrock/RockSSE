@@ -6,7 +6,6 @@ use ProcessWire\WireData;
 
 class Iterator extends WireData
 {
-  public $context;
   public int $index = 0;
   public int $num = 1;
   public float $progress = 0;
@@ -15,7 +14,6 @@ class Iterator extends WireData
   public function __debugInfo()
   {
     return [
-      'context' => $this->context,
       'index' => $this->index,
       'num' => $this->num,
       'progress' => $this->progress,
@@ -25,7 +23,8 @@ class Iterator extends WireData
 
   public function isDone(): bool
   {
-    return $this->progress >= 1;
+    if ($this->total < 1) return false;
+    return $this->num >= $this->total;
   }
 
   public function next(): void
@@ -44,6 +43,7 @@ class Iterator extends WireData
 
   private function updateProgress(): void
   {
-    $this->progress = round($this->num / $this->total, 4);
+    if (!$this->total) return;
+    $this->progress = round($this->num / $this->total, 6);
   }
 }

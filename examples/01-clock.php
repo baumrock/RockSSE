@@ -2,10 +2,14 @@
 
 namespace ProcessWire;
 
+use RockSSE\Stream;
+
 rocksse()->addStream(
   url: '/examples/clock',
-  loop: function (RockSSE $sse) {
-    $sse->send(date("Y-m-d H:i:s"));
-    sleep(1);
+  init: function (Stream $stream) {
+    $stream->sleep = 1000;
+  },
+  loop: function (Stream $stream) {
+    $stream->send(date("Y-m-d H:i:s"));
   },
 );
