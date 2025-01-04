@@ -1,0 +1,98 @@
+<p class="description">
+  Delete users having a name that starts with "rocksse-example". We demonstrate
+  two things:
+</p>
+<ol>
+  <li>Log message to textarea</li>
+  <li>Show progressbar</li>
+</ol>
+{buttons}
+<textarea
+  class="uk-textarea log uk-margin-top"
+  rows="5"
+></textarea>
+<div
+  class="uk-flex uk-flex-middle"
+  style="gap: 20px"
+>
+  <span
+    class="uk-text-nowrap uk-text-small"
+    style="font-family: monospace"
+  >
+    <span class="num">0</span> /
+    <span class="total">0</span>
+  </span>
+  <progress class="uk-progress"></progress>
+</div>
+<script>
+  (() => {
+    const stream = RockSSE.addStream("/examples/delete-users");
+
+    // dom elements
+    const li = document.currentScript.closest("li.Inputfield");
+    const start = li.querySelector(".start");
+    const stop = li.querySelector(".stop");
+    const log = li.querySelector(".log");
+    const num = li.querySelector(".num");
+    const total = li.querySelector(".total");
+    const progress = li.querySelector("progress");
+
+    // helper functions
+    const setProgress = (newNum, newTotal) => {
+      num.innerText = newNum;
+      total.innerText = newTotal;
+      if (!newTotal) progress.value = 0;
+      else progress.value = newNum / newTotal;
+    };
+
+    // handle clicks on start button
+    start.addEventListener("click", stream.start.bind(stream));
+
+    // handle clicks on stop button
+    stop.addEventListener("click", stream.stop.bind(stream));
+
+    // ----- setup stream -----
+    stream.debug = false;
+
+    stream.onstarted = () => {
+      setProgress(0, 0);
+    };
+
+    stream.onmessage = (event) => {
+      // try to parse JSON from the message
+      const json = stream.getJSON(event.data);
+      if (json) {
+        // if we got JSON data update the progress
+        stream.data.num = json.num || 0;
+        stream.data.total = json.total || 0;
+      }
+
+      // always log the message to the textarea
+      log.value = event.data + "\n" + log.value;
+    };
+
+    /**
+     * Use oninterval to update the progressbar
+     * This is because when updating on every message the css transitions
+     * can not keep pace and the progress indication fails!
+     */
+    stream.oninterval = (data) => {
+      stream.log(data);
+      setProgress(data.num || 0, data.total || 0);
+    };
+
+    stream.onstop = () => {
+      // stop button was pressed while stream is already done
+      // we reset stream data which will later cause the progressbar
+      // to redraw in oninterval
+      if (!stream.isRunning) stream.data = {};
+    };
+
+    stream.onstopped = () => {
+      stream.message("Connection closed");
+      // reset progressbar if job was not complete
+      // stay at 100% when job was successfully completed
+      if (progress.value < 1) setProgress(0, 0);
+    };
+  })();
+</script>

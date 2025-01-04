@@ -1,0 +1,35 @@
+<p class="description">
+  This example shows a simple clock that uses the SSE stream to show the current
+  server time every second.
+</p>
+{buttons}
+<span class="uk-text-nowrap">
+  Server Time:
+  <span class="uk-margin-small-left clock">--- not yet started ---</span>
+</span>
+<script>
+  (() => {
+    const stream = RockSSE.addStream("/examples/clock");
+
+    // dom elements
+    const li = document.currentScript.closest("li.Inputfield");
+    const start = li.querySelector(".start");
+    const stop = li.querySelector(".stop");
+    const clock = li.querySelector(".clock");
+
+    // handle clicks on start button
+    start.addEventListener("click", stream.start.bind(stream));
+
+    // handle clicks on stop button
+    stop.addEventListener("click", stream.stop.bind(stream));
+
+    // setup stream
+    stream.debug = true;
+    stream.onmessage = (event) => {
+      clock.innerText = event.data;
+    };
+    stream.onstopped = () => {
+      clock.innerText = "--- stopped ---";
+    };
+  })();
+</script>
