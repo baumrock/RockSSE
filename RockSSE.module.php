@@ -129,13 +129,18 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     if ($this->exampleData) return $this->exampleData;
     $arr = [];
     $examples = glob(__DIR__ . '/examples/*.php');
+    $buttons = wire()->files->render(__DIR__ . '/examples/_buttons.html');
     foreach ($examples as $file) {
       $data = wire()->files->render($file);
       if (!is_array($data)) $data = [];
       if (!array_key_exists('value', $data)) {
         // load markup from .html file
         $html = substr($file, 0, -4) . '.html';
-        if (is_file($html)) $data['value'] = wire()->files->render($html);
+        if (is_file($html)) {
+          $markup = wire()->files->render($html);
+          $markup = str_replace('{buttons}', $buttons, $markup);
+          $data['value'] = $markup;
+        }
       }
       $arr[$file] = $data;
     }

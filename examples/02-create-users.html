@@ -1,19 +1,19 @@
 <p class="description">
-  This example shows a simple clock that uses the SSE stream to show the current
-  server time every second.
+  This example will create a new guest user with name "rocksse-demo-#" every
+  second as long as the stream is running. It will log output to a textarea.
 </p>
 {buttons}
-<span class="uk-text-nowrap">
-  Server Time:
-  <span class="uk-margin-small-left clock">--- not yet started ---</span>
-</span>
+<textarea
+  class="uk-textarea log uk-margin-top"
+  rows="10"
+></textarea>
 <script>
   (() => {
     let isRunning = false;
     const li = document.currentScript.closest("li.Inputfield");
     const start = li.querySelector(".start");
     const stop = li.querySelector(".stop");
-    const clock = li.querySelector(".clock");
+    const log = li.querySelector(".log");
     let conn = false;
 
     // handle clicks on start button
@@ -24,9 +24,10 @@
 
       // start stream and update the conn variable
       conn = RockSSE.start({
-        url: "/examples/clock",
+        url: "/examples/create-users",
         onmessage: (msg) => {
-          clock.innerText = msg;
+          // prepend msg to log textarea
+          log.value = msg + "\n" + log.value;
         },
         onerror: (event) => {
           isRunning = false;
@@ -39,12 +40,7 @@
       // prevent stopping stream more than once
       if (!isRunning) return;
       isRunning = false;
-
-      // close connection
       conn.close();
-
-      // update text
-      clock.innerText = "--- stopped ---";
     });
   })();
 </script>
