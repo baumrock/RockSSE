@@ -10,6 +10,8 @@ function rocksse(): RockSSE
   return wire()->modules->get('RockSSE');
 }
 
+require_once __DIR__ . '/Stream.php';
+require_once __DIR__ . '/Iterator.php';
 /**
  * @author Bernhard Baumrock, 03.01.2025
  * @license Licensed under MIT
@@ -37,7 +39,6 @@ class RockSSE extends WireData implements Module, ConfigurableModule
       throw new WireException("Stream already exists: $url");
     }
 
-    require_once __DIR__ . '/Stream.php';
     $stream = new Stream($url);
     $stream->loop = $loop;
     if (is_callable($init)) $stream->init = $init;
@@ -134,7 +135,6 @@ class RockSSE extends WireData implements Module, ConfigurableModule
 
   public function newIterator(): Iterator
   {
-    require_once __DIR__ . '/Iterator.php';
     return new Iterator();
   }
 
