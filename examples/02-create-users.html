@@ -7,6 +7,12 @@
   class="uk-textarea log uk-margin-top"
   rows="10"
 ></textarea>
+<p class="notes uk-margin-remove-bottom">
+  Note: When the stream is closed from the client it takes some time for the
+  server to recognise that the connection was closed and therefore the server
+  will keep running the loop for some time. This is due to the
+  single-directional nature of SSE.
+</p>
 <script>
   (() => {
     let isRunning = false;
