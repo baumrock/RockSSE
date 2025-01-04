@@ -58,11 +58,9 @@
       const json = stream.getJSON(event.data);
       if (json) {
         // if we got JSON data update the progress
-        if (json.num !== undefined && json.total !== undefined) {
-          setProgress(json.num, json.total);
-        }
+        setProgress(json.num || 0, json.total || 0);
       }
-      // always log the message
+      // always log the message to the textarea
       log.value = event.data + "\n" + log.value;
     };
 
