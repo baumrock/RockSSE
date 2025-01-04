@@ -1,10 +1,5 @@
 # RockSSE
 
-## Usage
+SSE (Server Sent Events) helper for ProcessWire
 
-```php
-rocksse()->add('/clock', function(RockSSE $sse) {
-  $sse->send(date("Y-m-d H:i:s"));
-  sleep(1);
-});
-```
+Install the module and check out the examples on the module config page!
