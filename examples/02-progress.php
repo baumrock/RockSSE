@@ -7,9 +7,11 @@ $max = 100;
 rocksse()->addStream(
   url: '/examples/progress',
   loop: function (RockSSE $sse) use (&$count, $max) {
-    $count += 10;
+    $count += 1;
     if ($count > $max) return false;
     $sse->send($count);
-    sleep(1);
+
+    $ms = 200;
+    usleep($ms * 1000);
   },
 );

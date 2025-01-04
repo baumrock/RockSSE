@@ -33,13 +33,16 @@
     ></progress>
   </div>
 </div>
+<p class="notes uk-margin-remove-bottom">
+  For simplicity we hardcoded all values in this example!
+</p>
 <script>
   (() => {
     let isRunning = false;
-    let start = document.querySelector("#start-progress");
-    let stop = document.querySelector("#stop-progress");
-    let current = document.querySelector("#current");
-    let progress = document.querySelector("#progress");
+    const start = document.querySelector("#start-progress");
+    const stop = document.querySelector("#stop-progress");
+    const current = document.querySelector("#current");
+    const progress = document.querySelector("#progress");
     let conn = false;
 
     // handle clicks on start button
@@ -47,6 +50,9 @@
       // prevent starting stream more than once
       if (isRunning) return;
       isRunning = true;
+
+      // set progressbar to 1% to indicate it is doing something
+      progress.value = 0.01;
 
       // start stream and update the conn variable
       conn = RockSSE.start({
