@@ -1,0 +1,58 @@
+<p class="description">
+  This example will create a new guest user with name "rocksse-demo-#" every
+  second as long as the stream is running. It will log output to a textarea.
+</p>
+{buttons}
+<textarea
+  class="uk-textarea log uk-margin-top"
+  rows="10"
+></textarea>
+<p class="notes uk-margin-remove-bottom">
+  Note: When the stream is closed from the client it takes some time for the
+  server to recognise that the connection was closed and therefore the server
+  will keep running the loop for some time. This is due to the
+  single-directional nature of SSE.
+</p>
+<script>
+  (() => {
+    let isRunning = false;
+    const li = document.currentScript.closest("li.Inputfield");
+    const start = li.querySelector(".start");
+    const stop = li.querySelector(".stop");
+    const log = li.querySelector(".log");
+    let conn = false;
+
+    const logMsg = function (msg) {
+      log.value = msg + "\n" + log.value;
+    };
+
+    // handle clicks on start button
+    start.addEventListener("click", (e) => {
+      // prevent starting stream more than once
+      if (isRunning) return;
+      isRunning = true;
+
+      // start stream and update the conn variable
+      conn = RockSSE.start({
+        url: "/examples/delete-users",
+        onmessage: (msg) => {
+          logMsg(msg);
+        },
+        onerror: (event) => {
+          isRunning = false;
+        },
+      });
+    });
+
+    // handle clicks on stop button
+    stop.addEventListener("click", (e) => {
+      // prevent stopping stream more than once
+      if (!isRunning) return;
+      isRunning = false;
+      conn.close();
+      logMsg(
+        "Connection closed - some more users might have been deleted in the background during shutdown."
+      );
+    });
+  })();
+</script>

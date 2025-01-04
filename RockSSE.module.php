@@ -2,6 +2,8 @@
 
 namespace ProcessWire;
 
+use RockSSE\Iterator;
+
 function rocksse(): RockSSE
 {
   return wire()->modules->get('RockSSE');
@@ -26,11 +28,18 @@ class RockSSE extends WireData implements Module, ConfigurableModule
   public function addStream(
     string $url,
     callable $loop,
+    callable $init = null,
   ): void {
-    wire()->addHookAfter($url, function () use ($loop) {
+    wire()->addHookAfter($url, function () use ($loop, $init) {
       set_time_limit(0);
       header("Cache-Control: no-cache");
       header("Content-Type: text/event-stream");
+
+      // initialize the iterator
+      $iterator = $this->newIterator();
+
+      // if we have an init callback we call it now
+      if (is_callable($init)) $init($iterator);
 
       // start endless loop for the stream
       while (true) {
@@ -38,10 +47,12 @@ class RockSSE extends WireData implements Module, ConfigurableModule
         if (connection_aborted()) break;
 
         // execute the callback and get result
-        $result = $loop($this);
+        $result = $loop($this, $iterator);
 
         // if the callback returned FALSE we break out of the endless loop
         if ($result === false) break;
+
+        $iterator->next();
       }
     });
   }
@@ -96,6 +107,12 @@ class RockSSE extends WireData implements Module, ConfigurableModule
   {
     $this->addExamples($inputfields);
     return $inputfields;
+  }
+
+  public function newIterator(): Iterator
+  {
+    require_once __DIR__ . '/Iterator.php';
+    return new Iterator();
   }
 
   public function ready(): void
