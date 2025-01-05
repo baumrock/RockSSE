@@ -152,6 +152,7 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     // add RockSSE.js file
     $url = wire()->config->urls->root;
     wire()->config->js('rocksse-done', Stream::done);
+    wire()->config->js('RockSSETranslations', $this->translations());
     wire()->config->scripts->add($url . 'site/modules/RockSSE/dst/RockSSE.min.js');
 
     // show warning when example hooks are attached to not forget disabling them
@@ -173,5 +174,13 @@ class RockSSE extends WireData implements Module, ConfigurableModule
     $stream = $this->getStream($url);
     if (!$stream) throw new Wire404Exception("Stream not found: $url");
     $stream->serve();
+  }
+
+  public function translations(): array
+  {
+    return [
+      'ok' => __('OK'),
+      'cancel' => __('Cancel'),
+    ];
   }
 }

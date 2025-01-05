@@ -9,6 +9,12 @@ var RockSSE;
       console.log("added stream", stream);
       return stream;
     }
+
+    x(key) {
+      const translations = ProcessWire.config.RockSSETranslations;
+      // if key is found return it, otherwise return key
+      return translations[key] || key;
+    }
   }
 
   class Stream {
