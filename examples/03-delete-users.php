@@ -16,7 +16,7 @@ rocksse()->addStream(
       $stream->done();
     }
     $iterator->setTotal($total);
-    $stream->iterator->userIDs = $userIDs;
+    $iterator->userIDs = $userIDs;
   },
   loop: function (Stream $stream) {
     $iterator = $stream->iterator;
